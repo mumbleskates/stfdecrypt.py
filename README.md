@@ -6,11 +6,12 @@ This is a *python* implementation of decryptor and encryptor for savegames of th
 In fact this is basicly python port of https://github.com/johndoe31415/startradersdecryptor 
 with added encryption. BTW, execelent analysis, @johndoe31415 !
 
-Tested on Windows 10 - Star Traders: Frontiers v3.1.9
+Tested on Windows 10 - Star Traders: Frontiers v3.2.9
+
+Modified for standalone without dependencies by Kent Ross
 
 ## Install
-* You need Python 3.5+ (see https://www.python.org/downloads/)
-* You need CryptoPlus (see https://github.com/doegox/python-cryptoplus)
+* You need Python 3.9+ (see https://www.python.org/downloads/)
 * Download this package to some local directory (and unzip if needed)
 
 ## Usage
