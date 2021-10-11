@@ -18,7 +18,7 @@ def number2string_N(i, N):
     Output: string (big-endian)
     """
     s = '%0*x' % (N * 2, i)
-    return s.decode('hex')
+    return bytes.fromhex(s)
 
 
 def string2number(i):
@@ -27,13 +27,17 @@ def string2number(i):
     Input: string (big-endian)
     Output: long or integer
     """
-    return int(i.encode('hex'), 16)
+    if type(i) is str:
+        i = i.encode('L1')
+    return int(i.hex(), 16)
 
 
 def xorstring(a, b):
     """XOR two strings of same length
 
     For more complex cases, see CryptoPlus.Cipher.XOR"""
+    if len(a) != len(b):
+        print(f"a is {a!r} and b is {b!r}")
     assert len(a) == len(b)
     return number2string_N(string2number(a) ^ string2number(b), len(a))
 

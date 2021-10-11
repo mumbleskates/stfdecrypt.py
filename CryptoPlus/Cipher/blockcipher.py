@@ -478,7 +478,7 @@ class XTS:
         self.codebook1 = codebook1
         self.codebook2 = codebook2
 
-    def update(self, data, ed, tweak=''):
+    def update(self, data, ed, tweak=b''):
         # supply n as a raw string
         # tweak = data sequence number
         """Perform a XTS encrypt/decrypt operation.
@@ -488,20 +488,19 @@ class XTS:
         Every decrypt function called on a XTS cipher will output
           a decrypted block based on the current supplied ciphertext block.
         """
-        output = ''
+        output = b''
         assert len(
             data) > 15, "At least one block of 128 bits needs to be supplied"
         assert len(data) < 128 * pow(2, 20)
 
         # initializing T
         # e_k2_n = E_K2(tweak)
-        e_k2_n = self.codebook2.encrypt(tweak + '\x00' * (16 - len(tweak)))[
+        e_k2_n = self.codebook2.encrypt(tweak + b'\x00' * (16 - len(tweak)))[
                  ::-1]
         self.T = util.string2number(e_k2_n)
 
         i = 0
-        while i < ((
-                           len(data) // 16) - 1):  # Decrypt all the blocks but one last full block and opt one last partial block
+        while i < ((len(data) // 16) - 1):  # Decrypt all the blocks but one last full block and opt one last partial block
             # C = E_K1(P xor T) xor T
             output += self.__xts_step(ed, data[i * 16:(i + 1) * 16], self.T)
             # T = E_K2(n) mul (a pow i)
@@ -586,10 +585,10 @@ class CMAC:
 
         self.Rb = self.__Rb_dictionary[blocksize * 8]
 
-        mask1 = int(('\xff' * blocksize).encode('hex'), 16)
-        mask2 = int(('\x80' + '\x00' * (blocksize - 1)).encode('hex'), 16)
+        mask1 = int((b'\xff' * blocksize).hex(), 16)
+        mask2 = int((b'\x80' + b'\x00' * (blocksize - 1)).hex(), 16)
 
-        L = int(self.codebook.encrypt('\x00' * blocksize).encode('hex'), 16)
+        L = int(self.codebook.encrypt(b'\x00' * blocksize).hex(), 16)
 
         if L & mask2:
             Lu = ((L << 1) & mask1) ^ self.Rb
@@ -622,7 +621,7 @@ class CMAC:
         assert ed == 'e'
         blocksize = self.blocksize
 
-        m = (len(data) + blocksize - 1) / blocksize  # m = amount of datablocks
+        m = (len(data) + blocksize - 1) // blocksize  # m = amount of datablocks
         i = 0
         for i in range(1, m):
             self.IV = self.codebook.encrypt(
@@ -633,7 +632,7 @@ class CMAC:
             X = util.xorstring(util.xorstring(data[(i) * blocksize:], self.IV),
                                self.Lu)
         else:
-            tmp = data[(i) * blocksize:] + '\x80' + '\x00' * (
+            tmp = data[(i) * blocksize:] + b'\x80' + b'\x00' * (
                     blocksize - len(data[(i) * blocksize:]) - 1)
             X = util.xorstring(util.xorstring(tmp, self.IV), self.Lu2)
 

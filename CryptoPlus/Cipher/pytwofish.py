@@ -46,6 +46,8 @@ class Twofish:
 
     def set_key(self, key):
         """Init."""
+        if type(key) is str:
+            key = key.encode('L1')
         key_len = len(key)
         if key_len not in [16, 24, 32]:
             # XXX: add padding?
@@ -62,7 +64,7 @@ class Twofish:
         key_word32 = [0] * 32
         i = 0
         while key:
-            key_word32[i] = struct.unpack("<L", key[0:4].encode('L1'))[0]
+            key_word32[i] = struct.unpack("<L", key[0:4])[0]
             key = key[4:]
             i += 1
 
@@ -70,32 +72,35 @@ class Twofish:
 
     def decrypt(self, block):
         """Decrypt blocks."""
+        if type(block) is str:
+            block = block.encode('L1')
         if len(block) % 16:
             raise ValueError("block size must be a multiple of 16")
 
-        plaintext = ''
+        plaintext = b''
 
         while block:
-            a, b, c, d = struct.unpack("<4L", block[:16].encode('L1'))
+            a, b, c, d = struct.unpack("<4L", block[:16])
             temp = [a, b, c, d]
             decrypt(self.context, temp)
-            plaintext += struct.pack("<4L", *temp).decode('L1')
+            plaintext += struct.pack("<4L", *temp)
             block = block[16:]
 
         return plaintext
 
     def encrypt(self, block):
         """Encrypt blocks."""
+        if type(block) is str:
+            block = block.encode('L1')
         if len(block) % 16:
             raise ValueError("block size must be a multiple of 16")
 
-        ciphertext = ''
+        ciphertext = b''
 
         while block:
-            a, b, c, d = struct.unpack("<4L", block[0:16].encode('L1'))
-            temp = [a, b, c, d]
+            temp = list(struct.unpack("<4L", block[0:16]))
             encrypt(self.context, temp)
-            ciphertext += struct.pack("<4L", *temp).decode('L1')
+            ciphertext += struct.pack("<4L", *temp)
             block = block[16:]
 
         return ciphertext
@@ -487,10 +492,11 @@ def decrypt(pkey, in_blk):
     return
 
 
-__testkey = ('\xD4\x3B\xB7\x55\x6E\xA3\x2E\x46\xF2\xA2\x82\xB7\xD4\x5B\x4E\x0D'
-             '\x57\xFF\x73\x9D\x4D\xC9\x2C\x1B\xD7\xFC\x01\x70\x0C\xC8\x21\x6F')
-__testdat = '\x90\xAF\xE9\x1B\xB2\x88\x54\x4F\x2C\x32\xDC\x23\x9B\x26\x35\xE6'
-assert 'l\xb4V\x1c@\xbf\n\x97\x05\x93\x1c\xb6\xd4\x08\xe7\xfa' == Twofish(
+__testkey = (
+    b'\xD4\x3B\xB7\x55\x6E\xA3\x2E\x46\xF2\xA2\x82\xB7\xD4\x5B\x4E\x0D'
+    b'\x57\xFF\x73\x9D\x4D\xC9\x2C\x1B\xD7\xFC\x01\x70\x0C\xC8\x21\x6F')
+__testdat = b'\x90\xAF\xE9\x1B\xB2\x88\x54\x4F\x2C\x32\xDC\x23\x9B\x26\x35\xE6'
+assert b'l\xb4V\x1c@\xbf\n\x97\x05\x93\x1c\xb6\xd4\x08\xe7\xfa' == Twofish(
     __testkey).encrypt(__testdat)
 assert __testdat == Twofish(__testkey).decrypt(
-    'l\xb4V\x1c@\xbf\n\x97\x05\x93\x1c\xb6\xd4\x08\xe7\xfa')
+    b'l\xb4V\x1c@\xbf\n\x97\x05\x93\x1c\xb6\xd4\x08\xe7\xfa')
